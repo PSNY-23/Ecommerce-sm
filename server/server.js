@@ -2,9 +2,13 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-const app = express();
+import router from "./routes/index.js";
+import dotenv from "dotenv";
 
-const PORT = process.env.PORT || 3000;
+const app = express();
+dotenv.config();
+
+const PORT = process.env.PORT || 3001;
 
 //Create a database connection
 mongoose
@@ -34,6 +38,12 @@ app.use(
   })
 );
 app.use(cookieParser());
+
+//Routes
+app.get("/", (req, res) => {
+  res.send("Hello World");
+});
+app.use("/api", router);
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
