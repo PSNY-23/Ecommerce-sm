@@ -4,6 +4,7 @@ import { registerFormControls } from "@/config";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { registerUser } from "@/store/auth-slice";
+import { useToast } from "@/hooks/use-toast";
 
 const initialState = {
   username: "",
@@ -14,6 +15,7 @@ const AuthRegister = () => {
   const [formData, setFormData] = useState(initialState);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { toast } = useToast();
   function onSubmit(event) {
     event.preventDefault();
     let { email, password, userName } = formData;
@@ -24,7 +26,19 @@ const AuthRegister = () => {
     };
     // dispatch(registerUser(formData));
     dispatch(registerUser(data)).then((res) => {
-      if (res?.payload?.success) navigate("/auth/login");
+      if (res?.payload?.success) {
+        toast({
+          title: res?.payload?.message,
+          description:
+            "I am loginv this toast notification it's so simple and robust to use",
+        });
+        navigate("/auth/login");
+      } else {
+        toast({
+          title: res?.payload?.message,
+          variant: "destructive",
+        });
+      }
     });
   }
 

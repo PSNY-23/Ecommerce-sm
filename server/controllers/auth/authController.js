@@ -7,17 +7,17 @@ import jwt from "jsonwebtoken";
 const registerUser = async (req, res) => {
   const { username, email, password } = req.body;
   if (!username || !email || !password) {
-    return res.status(400).json({ msg: "All fields are required" });
+    return res.status(400).json({ messageg: "All fields are required" });
   }
   try {
     const user = await User.findOne({
       email
     });
-    if (user) return res.status(400).json({ msg: "The email already exists" });
+    if (user) return res.status(400).json({ messageg: "The email already exists" });
     if (password.length < 6)
       return res
         .status(400)
-        .json({ msg: "Password must be at least 6 characters" });
+        .json({ message: "Password must be at least 6 characters" });
       // Password Encryption
       const passwordHash = await bcrypt.hash(password, 10);
     const newUser = new User({
@@ -40,15 +40,20 @@ const loginUser = async (req, res) => {
   const { email, password } = req.body;
   try {
     const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ msg: "User does not exist" });
+    if (!user) return res.status(400).json({success:"false", message: "User does not exist" });
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ msg: "Incorrect password" });
+    if (!isMatch) return res.status(400).json({success:"false", message: "Incorrect password" });
     // If login success , create token
-    const payload = { id: user._id, username: user.username };
+    const payload = { id: user._id, username: user.username, role: user.role };
     const token = jwt.sign(payload, process.env.TOKEN_SECRET, {
       expiresIn: "1d",
     });
-    res.statu(200).json({success:'true', token });
+    res.cookie('token', token, { httpOnly: true, secure: false }).json({
+      success: 'true', message: "Logged In successfully", user: {
+        userId: user._id,
+        role: user.role
+      }
+    })
   } catch (error) {
     return res.status(500).json({success:'false',message: error.message });
   }
